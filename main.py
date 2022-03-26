@@ -152,12 +152,9 @@ N = 128
 x = np.arange(0, N, 1)
 y = np.sin((30 * np.pi * x)/N) + np.sin((20 * np.pi * x)/N)
 y = np.asarray(y)
-
 mas_c, mas_d = res_func(y)
 mas_c21 = createMas_c2(mas_c)
-
 mas_d21 = createMas_c2(mas_d)
-
 y_now1 = recovery_y(mas_c[len(mas_c)-1], mas_d)
 
 #2
@@ -167,14 +164,13 @@ y2 = (func_sigma2(x2,0) * np.sin((30 * np.pi * x2)/N)) + (func_sigma2(x2,b) * np
 result(x, y, x2, y2, N)
 mas_c, mas_d = res_func(y2)
 mas_c22 = createMas_c2(mas_c)
-
 mas_d22 = createMas_c2(mas_d)
-
 map_color(mas_c21, mas_c22)
-
 map_color(mas_d21, mas_d22)
-
-
 y_now2 = recovery_y(mas_c[len(mas_c)-1], mas_d)
 
 ito(x, y, y_now1, y2, y_now2)
+
+print(mas_d)
+
+
