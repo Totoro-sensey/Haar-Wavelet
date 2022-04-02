@@ -1,3 +1,5 @@
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,19 +14,44 @@ def result(x, y, x2, y2, N):
     axs[1][1].plot(np.repeat(x, 3), func_0(Xr2))
     plt.show()
 
-def map_color(mas_c21, mas_c22):
+
+def resultForOne(x, y,  N):
+    Xr, Fk = get_Xr_Fk(y, N)
+    fig, axs = plt.subplots(2, figsize=(12, 7))
+    axs[0].plot(x, y)
+    axs[1].plot(np.repeat(x, 3), func_0(Xr))
+    plt.suptitle("Исходный")
+    plt.show()
+
+    mas_c, mas_d = res_func(y)
+    mas_c21 = createMas_c2(mas_c)
+    mas_d21 = createMas_c2(mas_d)
+
+    y_now1 = recovery_y(mas_c[len(mas_c) - 1], mas_d)
+    map_color(mas_c21,'Mass C signal', mas_d21, 'Mass D signal')
+
+    fig, axs = plt.subplots(2, figsize=(12, 7))
+    axs[0].plot(x, y)
+    axs[0].set_title('Исходный')
+    axs[1].plot(x, y_now1)
+    axs[1].set_title('Восстановленный')
+    plt.show()
+
+def map_color(mas_c21, nameMap1, mas_c22, nameMap2):
     fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(11, 6))
     plt.subplot(2, 1, 1)
     p1 = axs[0].pcolormesh(mas_c21, cmap='gray', edgecolors="face", shading='flat')
     plt.colorbar(p1, ax=axs[0])
+    axs[0].set_title(nameMap1)
 
     plt.subplot(2, 1, 2)
     p2 = axs[1].pcolormesh(mas_c22, cmap='gray', edgecolors="face", shading='flat')
     plt.colorbar(p2, ax=axs[1])
+    axs[1].set_title(nameMap2)
 
     plt.show()
 
-def ito(xs1,ys1, ys2, yss1, yss2 ):
+def outputMap(xs1,ys1, ys2, yss1, yss2 ):
     fig, axs = plt.subplots(2, 2, figsize=(12, 7))
     axs[0][0].plot(xs1, ys1)
     axs[0][0].set_title('Исходный')
@@ -142,9 +169,16 @@ def recovery_y(C, mas_d):
         mas_y.append(mas_yr)
         nowmas = mas_yr
         mas_yr = []
-    return mas_y[7]
+    return mas_y[len(mas_y)-1]
 
-N = 128
+def pms(x_list):
+    y_list = []
+    for x in x_list:
+        y_list.append(math.cos( math.pi * x/10 + 5 * math.sin( x ) ) )
+
+    return np.array(y_list)
+
+N = 512
 
 
 
@@ -152,9 +186,11 @@ N = 128
 x = np.arange(0, N, 1)
 y = np.sin((30 * np.pi * x)/N) + np.sin((20 * np.pi * x)/N)
 y = np.asarray(y)
+
 mas_c, mas_d = res_func(y)
 mas_c21 = createMas_c2(mas_c)
 mas_d21 = createMas_c2(mas_d)
+
 y_now1 = recovery_y(mas_c[len(mas_c)-1], mas_d)
 
 #2
@@ -162,15 +198,36 @@ b=100
 x2 = np.arange(0, N, 1)
 y2 = (func_sigma2(x2,0) * np.sin((30 * np.pi * x2)/N)) + (func_sigma2(x2,b) * np.sin((20 * np.pi * x2)/N))
 result(x, y, x2, y2, N)
+
 mas_c, mas_d = res_func(y2)
 mas_c22 = createMas_c2(mas_c)
 mas_d22 = createMas_c2(mas_d)
-map_color(mas_c21, mas_c22)
-map_color(mas_d21, mas_d22)
+
+map_color(mas_c21,'Mass C signal 1', mas_c22, 'Mass C signal 2')
+map_color(mas_d21,'Mass D signal 1', mas_d22, 'Mass D signal 2')
+
 y_now2 = recovery_y(mas_c[len(mas_c)-1], mas_d)
 
-ito(x, y, y_now1, y2, y_now2)
+outputMap(x, y, y_now1, y2, y_now2)
 
-print(mas_d)
+#3 lab
+#АМ
+xs = np.arange(-20, 20, 40/N)
+m = float(input("Введите коэффициент модуляции\n"))
+ys = 5*(1+m*np.cos(((np.pi/8)*xs)+0))*np.cos(2*np.pi*xs)
+resultForOne(xs, ys,  N)
+
+#ЧМ
+m = 6.36
+x = np.arange(0, 10, 10/N)
+y = np.sin((np.pi*x*10)+(-np.cos(x*np.pi)*m))
+x = np.arange(0, N, 1)
+resultForOne(x, y, N)
+
+#ФМ
+x = np.arange(-20, 20, 40/N)
+y = pms(x)
+resultForOne(x, y, N)
+
 
 
